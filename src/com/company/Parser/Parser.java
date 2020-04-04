@@ -8,10 +8,6 @@ public class Parser extends ParserBase {
     private int oldIfAmount = 0;
     private int newIfAmount = 0;
 
-    public int getOldIfAmount() {
-        return oldIfAmount;
-    }
-
     public void setSource(String source){
         setSourceAndDefault(source);
         newIfAmount = 0;
