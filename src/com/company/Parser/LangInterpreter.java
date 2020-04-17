@@ -9,57 +9,57 @@ public class LangInterpreter {
     private HashMap<String, Integer> varTable =
             new HashMap<>();
 
-    private AstNode programNode = null;
+    private AstNode programNode;
     private StringBuilder output = new StringBuilder();
 
     public LangInterpreter(AstNode programNode) throws Exception {
-        if(programNode.type != AstNodeType.STATEMENT_LIST)
+        if(programNode.getType() != AstNodeType.STATEMENT_LIST)
             throw new Exception("Bad program");
         this.programNode = programNode;
     }
 
     private int executeNode(AstNode node) throws Exception {
-        switch (node.type){
-            case AstNodeType.UNKNOWN:
+        switch (node.getType()){
+            case UNKNOWN:
                 System.out.println("UNKNOWN");
-            case AstNodeType.INTEGER:
-                return Integer.parseInt(node.text);
-            case AstNodeType.IDENTIFIER:
-                if(varTable.containsKey(node.text))
-                    return varTable.get(node.text);
+            case INTEGER:
+                return Integer.parseInt(node.getText());
+            case IDENTIFIER:
+                if(varTable.containsKey(node.getText()))
+                    return varTable.get(node.getText());
                 else
                     throw new Exception("Variable not define");
-            case AstNodeType.ADD:
+            case ADD:
                 return executeNode(node.getChild(0)) + executeNode(node.getChild(1));
-            case AstNodeType.SUB:
+            case SUB:
                 return executeNode(node.getChild(0)) - executeNode(node.getChild(1));
-            case AstNodeType.MUL:
+            case MUL:
                 return executeNode(node.getChild(0)) * executeNode(node.getChild(1));
-            case AstNodeType.DIV:
+            case DIV:
                 return executeNode(node.getChild(0)) / executeNode(node.getChild(1));
-            case AstNodeType.GREATER:
+            case GREATER:
                 if(executeNode(node.getChild(0)) > executeNode(node.getChild(1)))
                     return 1;
                 else return 0;
-            case AstNodeType.LESS:
+            case LESS:
                 if(executeNode(node.getChild(0)) < executeNode(node.getChild(1)))
                     return 1;
                 else return 0;
-            case AstNodeType.ASSIGN_STATEMENT:
+            case ASSIGN_STATEMENT:
                 int node1 = executeNode(node.getChild(1));
-                if(varTable.containsKey(node.getChild(0).text)){
-                    varTable.replace(node.getChild(0).text, node1);
+                if(varTable.containsKey(node.getChild(0).getText())){
+                    varTable.replace(node.getChild(0).getText(), node1);
                 }else
-                    varTable.put(node.getChild(0).text, node1);
+                    varTable.put(node.getChild(0).getText(), node1);
                 break;
-            case AstNodeType.IF_STATEMENT:
+            case IF_STATEMENT:
                 if(executeNode(node.getChild(0)) != 0)
                     return executeNode(node.getChild(1));
                 else break;
-            case AstNodeType.EXPRESSION_STATEMENT:
+            case EXPRESSION_STATEMENT:
                 output.append(executeNode(node.getChild(0))).append(" ");
                 break;
-            case AstNodeType.STATEMENT_LIST:
+            case STATEMENT_LIST:
                 for(int i = 0;i < node.childCount();i++)
                     executeNode(node.getChild(i));
                 break;

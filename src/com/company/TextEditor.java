@@ -3,6 +3,7 @@ package com.company;
 import com.company.AstTree.AstNode;
 import com.company.Parser.LangInterpreter;
 import com.company.Parser.Parser;
+import com.company.Parser.IfChecker;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -12,10 +13,12 @@ import javax.swing.plaf.metal.OceanTheme;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Arrays;
 
 public class TextEditor extends JFrame implements ActionListener {
     private AstNode program;
     private Parser parser = new Parser();
+    private IfChecker ifChecker = new IfChecker();
 
     // Text component
     private JTextArea textArea;
@@ -28,12 +31,35 @@ public class TextEditor extends JFrame implements ActionListener {
         // Create a frame
         frame = new JFrame("Editor");
         DocumentListener documentListener = new DocumentListener() {
+            boolean watch = false;
+            boolean ready = true;
             @Override
             public void insertUpdate(DocumentEvent e) {
                 parser.setSource(textArea.getText());
                 try {
-                    program = parser.parse();
-                    if(parser.isIfAdded()) {
+                    if(textArea.getText().charAt(textArea.getCaretPosition()) == 'i' && !watch) {
+                        ready = false;
+                    }
+                    if (textArea.getText().charAt(textArea.getCaretPosition()) == '{'
+                            && !watch
+                            && textArea.getText().charAt(textArea.getCaretPosition() - 1) == ')') {
+                        watch = true;
+                    }
+                    if(watch)
+                        if(textArea.getText().charAt(textArea.getCaretPosition()) == '\n'
+                                || textArea.getText().charAt(textArea.getCaretPosition()) == '}'){
+                            if(textArea.getText().charAt(textArea.getCaretPosition()) == '}'){
+                                ready = true;
+                                watch = false;
+                            }
+                    }
+                    if(textArea.getText().charAt(textArea.getCaretPosition()) == ';') {
+                        ready = true;
+                        watch = false;
+                    }
+                    if(ready)
+                        program = parser.parse();
+                    if(ifChecker.isRightIfAdded(program)) {
                         JOptionPane.showMessageDialog(frame, "If-statement added");
                     }
                 } catch (Exception ex) {
@@ -42,14 +68,6 @@ public class TextEditor extends JFrame implements ActionListener {
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
-                parser.setSource(textArea.getText());
-                try {
-                    program = parser.parse();
-                    parser.isIfRemoved();
-                } catch (Exception ex) {
-                    ex.getStackTrace();
-                }
-
             }
 
             @Override
@@ -123,7 +141,6 @@ public class TextEditor extends JFrame implements ActionListener {
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
-
     // If a button is pressed
     public void actionPerformed(ActionEvent e)
     {
@@ -219,14 +236,16 @@ public class TextEditor extends JFrame implements ActionListener {
                 break;
             case "Run!":
                 try {
+                    parser.setSource(textArea.getText());
+                    program = parser.parse();
                     LangInterpreter interpreter = new LangInterpreter(program);
                     interpreter.execute();
                     JOptionPane.showMessageDialog(frame, interpreter.getOutput());
                 } catch (Exception ex) {
-                    ex.getStackTrace();
+                    System.out.println(Arrays.toString(ex.getStackTrace()));
                 }
-
                 break;
         }
     }
+
 }

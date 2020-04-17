@@ -46,19 +46,19 @@ public class ParserBase {
         int pos = getPos();
         for(String s : terms){
             boolean match = true;
-            for(char c : s.toCharArray())
-                if(current() == c)
+            for(char c : s.toCharArray()) {
+                if (current() == c) {
                     next();
-                else{
-                    if(!isUseBuffer)
+                } else {
+                    if (!isUseBuffer)
                         this.pos = pos;
                     else
                         bufferPos = pos;
                     match = false;
                     break;
                 }
+            }
             if(match){
-               // System.out.println(pos);
                 skip();
                 return s;
             }
@@ -76,7 +76,6 @@ public class ParserBase {
     }
 
     public String match(String ... terms) throws Exception {
-        int pos = getPos();
         String result = matchNoExcept(terms);
         if(result == null) {
             throw new Exception("Bad string");

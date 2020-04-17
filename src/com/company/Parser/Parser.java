@@ -5,12 +5,8 @@ import com.company.AstTree.AstNodeType;
 
 public class Parser extends ParserBase {
 
-    private int oldIfAmount = 0;
-    private int newIfAmount = 0;
-
     public void setSource(String source){
         setSourceAndDefault(source);
-        newIfAmount = 0;
     }
 
     //Integer
@@ -51,89 +47,89 @@ public class Parser extends ParserBase {
             match(")");
             return result;
         }else if(Character.isLetter(current())){
-            int pos = getPos();
             return ident();
         }else
             return number();
     }
 
-    //MultiplyDivisionExpression → SimpleExpression
-    // | MultiplyDivisionExpression * SimpleExpression
-    // | MultiplyDivisionExpression / SimpleExpression
-    public AstNode multDivExpression() throws Exception {
+    // BinaryExpression -> ConditionExpression | PlusMinusExpression | MultDivExpression
+    public AstNode binaryExpression(int method) throws Exception {
         int beginPos = getPos();
-        while((!isMatch("*", "/")) && current() != ';'
+        int newMethod1;
+        int newMethod2;
+        String[] match;
+        switch (method){
+            //ConditionExpression -> PlusMinusExpression
+            // | PlusMinusExpression < PlusMinusExpression
+            // | PlusMinusExpression > PlusMinusExpression
+            case 1:
+                match = new String[]{">", "<"};
+                newMethod1 = 2;
+                newMethod2 = 2;
+                break;
+            //PlusMinusExpression → MultiplyDivisionExpression
+            // | PlusMinusExpression + MultiplyDivisionExpression
+            // | PlusMinusExpression - MultiplyDivisionExpression
+            case 2:
+                match = new String[]{"+", "-"};
+                newMethod1 = 2;
+                newMethod2 = 3;
+                break;
+            //MultiplyDivisionExpression → SimpleExpression
+            // | MultiplyDivisionExpression * SimpleExpression
+            // | MultiplyDivisionExpression / SimpleExpression
+            case 3:
+                match = new String[]{"*", "/"};
+                newMethod1 = 3;
+                newMethod2 = -1;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + method);
+        }
+        while((!isMatch(match))
+                && current() != ';'
                 && current() != '{'
-                && current() != 0){
+                && current() != 0
+                && current() != ')'){
             next();
         }
-        if(isMatch("*", "/")){
+        if(isMatch(match)){
             buffer = super.getSource().substring(beginPos, getPos());
-            String operation = match("*", "/");
-            AstNode temp2 = simpleExpression();
+            System.out.println("Buffer: " + buffer);
+            bufferPos = 0;
+            String operation = match(match);
+            AstNode temp2;
+            if(newMethod2 != -1)
+                temp2 = binaryExpression(newMethod2);
+            else
+                temp2 = simpleExpression();
             isUseBuffer = true;
-            AstNode temp1 = multDivExpression();
-            return operation.equals("*") ? new AstNode(AstNodeType.MUL, temp1, temp2)
-                    : new AstNode(AstNodeType.DIV, temp1, temp2);
+            AstNode temp1 = binaryExpression(newMethod1);
+            switch (method){
+                case 1:
+                    return operation.equals(">") ? new AstNode(AstNodeType.GREATER, temp1, temp2)
+                            : new AstNode(AstNodeType.LESS, temp1, temp2);
+                case 2:
+                    return operation.equals("+") ? new AstNode(AstNodeType.ADD, temp1, temp2)
+                            : new AstNode(AstNodeType.SUB, temp1, temp2);
+                case 3:
+                    return operation.equals("*") ? new AstNode(AstNodeType.MUL, temp1, temp2)
+                            : new AstNode(AstNodeType.DIV, temp1, temp2);
+                default: throw new Exception("Wrong method");
+            }
         }else {
             setPos(beginPos);
-            return simpleExpression();
-        }
-    }
-
-    //PlusMinusExpression → MultiplyDivisionExpression
-    // | PlusMinusExpression + MultiplyDivisionExpression
-    // | PlusMinusExpression - MultiplyDivisionExpression
-    public AstNode plusMinusExpression() throws Exception {
-        int beginPos = getPos();
-        while((!isMatch("+", "-")) && current() != ';'
-                && current() != '{'
-                && current() != 0){
-            next();
-        }
-        if(isMatch("+", "-")){
-            buffer = super.getSource().substring(beginPos, getPos());
-            bufferPos = 0;
-            String operation = match("+", "-");
-            AstNode temp2 = multDivExpression();
-            isUseBuffer = true;
-            AstNode temp1 = plusMinusExpression();
-            return operation.equals("+") ? new AstNode(AstNodeType.ADD, temp1, temp2)
-                    : new AstNode(AstNodeType.SUB, temp1, temp2);
-        }else {
-            setPos(beginPos);
-            return multDivExpression();
-        }
-    }
-
-    //ConditionExpression -> PlusMinusExpression
-    // | PlusMinusExpression < PlusMinusExpression
-    // | PlusMinusExpression > PlusMinusExpression
-    public AstNode conditionExpression() throws Exception {
-        int beginPos = getPos();
-        while((!isMatch(">", "<")
-                && current() != ';' && current() != 0)){
-            next();
-        }
-        if(isMatch(">", "<")){
-            buffer = super.getSource().substring(beginPos, getPos());
-            bufferPos = 0;
-            String operation = match(">", "<");
-            AstNode temp2 = plusMinusExpression();
-            isUseBuffer = true;
-            AstNode temp1 = plusMinusExpression();
-            return operation.equals(">") ? new AstNode(AstNodeType.GREATER, temp1, temp2)
-                    : new AstNode(AstNodeType.LESS, temp1, temp2);
-        }else{
-            setPos(beginPos);
-            return plusMinusExpression();
+            if(newMethod2 != -1)
+                return binaryExpression(newMethod2);
+            else
+                return simpleExpression();
         }
     }
 
     // Expression -> ConditionExpression
     public AstNode expression() throws Exception {
         isUseBuffer = false;
-        return conditionExpression();
+        return binaryExpression(1);
     }
 
     //BlockStatement → { StatementList }
@@ -162,7 +158,6 @@ public class Parser extends ParserBase {
         isUseBuffer = false;
         match(")");
         AstNode statement = statement();
-        newIfAmount++;
         return new AstNode(AstNodeType.IF_STATEMENT, expr, statement);
     }
 
@@ -211,20 +206,6 @@ public class Parser extends ParserBase {
             return program;
         else
             throw new Exception("Not the end");
-    }
-
-    public boolean isIfAdded(){
-        if(newIfAmount > oldIfAmount){
-            oldIfAmount = newIfAmount;
-            return true;
-        }
-        else return false;
-    }
-
-    public void isIfRemoved(){
-        if(newIfAmount < oldIfAmount){
-            oldIfAmount = newIfAmount;
-        }
     }
 
 }
