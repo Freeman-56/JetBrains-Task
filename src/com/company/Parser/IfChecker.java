@@ -35,7 +35,7 @@ public class IfChecker {
             }else if(oldNodes.get(i).getType() == AstNodeType.IF_STATEMENT
                         && newNodes.get(i).getType() == AstNodeType.IF_STATEMENT){
                     if(!oldNodes.get(i).equals(newNodes.get(i))
-                            && newNodes.get(i).getChilds().contains(oldNodes.get(i)))
+                            && newNodes.get(i).getChild(1).getChilds().contains(oldNodes.get(i)))
                         return true;
                 }
         }

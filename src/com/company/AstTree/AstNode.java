@@ -40,7 +40,6 @@ public class AstNode {
         childs.remove(child);
         childs.add(child);
         child.parent = this;
-
     }
 
     public int childCount(){
@@ -58,7 +57,6 @@ public class AstNode {
     public List<AstNode> getChilds() {
         return childs;
     }
-
 
     public AstNodeType getType() {
         return type;

@@ -10,7 +10,7 @@ public class Parser extends ParserBase {
     }
 
     //Integer
-    public AstNode number() throws Exception {
+    private AstNode number() throws Exception {
         StringBuilder num = new StringBuilder();
         while(Character.isDigit(current())) {
             num.append(current());
@@ -23,7 +23,7 @@ public class Parser extends ParserBase {
     }
 
     //Identifier
-    public AstNode ident() throws Exception {
+    private AstNode ident() throws Exception {
         StringBuilder identifier = new StringBuilder();
         if(Character.isLetter(current())) {
             identifier.append(current());
@@ -40,7 +40,7 @@ public class Parser extends ParserBase {
     }
 
     //SimpleExpression → Identifier | Integer | ( Expression )
-    public AstNode simpleExpression() throws Exception {
+    private AstNode simpleExpression() throws Exception {
         if(isMatch("(")){
             match("(");
             AstNode result = expression();
@@ -53,7 +53,7 @@ public class Parser extends ParserBase {
     }
 
     // BinaryExpression -> ConditionExpression | PlusMinusExpression | MultDivExpression
-    public AstNode binaryExpression(int method) throws Exception {
+    private AstNode binaryExpression(int method) throws Exception {
         int beginPos = getPos();
         int newMethod1;
         int newMethod2;
@@ -94,16 +94,15 @@ public class Parser extends ParserBase {
             next();
         }
         if(isMatch(match)){
-            buffer = super.getSource().substring(beginPos, getPos());
-            System.out.println("Buffer: " + buffer);
-            bufferPos = 0;
+            setBuffer(super.getSource().substring(beginPos, getPos()));
+            setBufferPosBegin();
             String operation = match(match);
             AstNode temp2;
             if(newMethod2 != -1)
                 temp2 = binaryExpression(newMethod2);
             else
                 temp2 = simpleExpression();
-            isUseBuffer = true;
+            setUseBuffer(true);
             AstNode temp1 = binaryExpression(newMethod1);
             switch (method){
                 case 1:
@@ -127,13 +126,13 @@ public class Parser extends ParserBase {
     }
 
     // Expression -> ConditionExpression
-    public AstNode expression() throws Exception {
-        isUseBuffer = false;
+    private AstNode expression() throws Exception {
+        setUseBuffer(false);
         return binaryExpression(1);
     }
 
     //BlockStatement → { StatementList }
-    public AstNode blockStatement() throws Exception {
+    private AstNode blockStatement() throws Exception {
         match("{");
         AstNode result = statementList();
         match("}");
@@ -141,7 +140,7 @@ public class Parser extends ParserBase {
     }
 
     //AssignStatement → @ Identifier = Expression
-    public AstNode assignStatement() throws Exception {
+    private AstNode assignStatement() throws Exception {
         match("@");
         AstNode id = ident();
         match("=");
@@ -151,20 +150,20 @@ public class Parser extends ParserBase {
     }
 
     //IfStatement → if ( Expression ) Statement
-    public AstNode ifStatement() throws Exception {
+    private AstNode ifStatement() throws Exception {
         match("if");
         match("(");
         AstNode expr = expression();
-        isUseBuffer = false;
+        setUseBuffer(false);
         match(")");
         AstNode statement = statement();
         return new AstNode(AstNodeType.IF_STATEMENT, expr, statement);
     }
 
     //ExpressionStatement -> Expression ;
-    public AstNode exprStatement() throws Exception {
+    private AstNode exprStatement() throws Exception {
         AstNode expr = expression();
-        isUseBuffer = false;
+        setUseBuffer(false);
         match(";");
         return new AstNode(AstNodeType.EXPRESSION_STATEMENT, expr);
     }
@@ -172,7 +171,7 @@ public class Parser extends ParserBase {
     //Statement → ExpressionStatement
     // | IfStatement | AssignStatement | BlockStatement
     private AstNode statement() throws Exception {
-        isUseBuffer = false;
+        setUseBuffer(false);
         if(isMatch("if"))
             return ifStatement();
         else if(isMatch("@"))
@@ -184,7 +183,7 @@ public class Parser extends ParserBase {
     }
 
     //StatementList → empty | StatementList Statement
-    public AstNode statementList() throws Exception {
+    private AstNode statementList() throws Exception {
         AstNode stateList = new AstNode(AstNodeType.STATEMENT_LIST);
         while(!end()) {
             if(isMatch("{", "}"))
@@ -195,7 +194,7 @@ public class Parser extends ParserBase {
     }
 
     //Program → StatementList
-    public AstNode program() throws Exception {
+    private AstNode program() throws Exception {
         return statementList();
     }
 

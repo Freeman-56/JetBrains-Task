@@ -1,13 +1,11 @@
 package com.company.Parser;
 
-public class ParserBase {
-    public final String DEFAULT_WHITESPACES = " \n\r\t";
-
-    private String source = null;
-    protected String buffer = null;
-    protected boolean isUseBuffer = false;
-    protected int bufferPos = 0;
-    private int pos = 0;
+public abstract class ParserBase {
+    private String source;
+    private String buffer;
+    private boolean isUseBuffer;
+    private int bufferPos;
+    private int pos;
 
     protected void setSourceAndDefault(String source){
         this.source = source;
@@ -17,18 +15,18 @@ public class ParserBase {
         pos = 0;
     }
 
-    public char current(){
+    protected char current(){
         if(!isUseBuffer)
             return getPos() < source.length() ? source.charAt(getPos()) : (char)0;
         else
             return getPos() < buffer.length() ? buffer.charAt(getPos()) : (char)0;
     }
 
-    public boolean end(){
+    protected boolean end(){
         return current() == 0;
     }
 
-    public void next(){
+    protected void next(){
         if(!end()) {
             if(!isUseBuffer)
                 this.pos = this.pos + 1;
@@ -37,7 +35,8 @@ public class ParserBase {
         }
     }
 
-    public void skip(){
+    protected void skip(){
+        String DEFAULT_WHITESPACES = " \n\r\t";
         while (DEFAULT_WHITESPACES.indexOf(current()) >= 0)
             next();
     }
@@ -75,7 +74,7 @@ public class ParserBase {
         return result != null;
     }
 
-    public String match(String ... terms) throws Exception {
+    protected String match(String... terms) throws Exception {
         String result = matchNoExcept(terms);
         if(result == null) {
             throw new Exception("Bad string");
@@ -85,19 +84,31 @@ public class ParserBase {
 
     }
 
-    public String getSource() {
+    protected String getSource() {
         return source;
     }
 
-    public int getPos() {
+    protected int getPos() {
         if(!isUseBuffer)
             return pos;
         else return bufferPos;
     }
 
-    public void setPos(int pos) {
+    protected void setPos(int pos) {
         if(!isUseBuffer)
             this.pos = pos;
         else bufferPos = pos;
+    }
+
+    protected void setBuffer(String buffer) {
+        this.buffer = buffer;
+    }
+
+    protected void setBufferPosBegin() {
+        this.bufferPos = 0;
+    }
+
+    protected void setUseBuffer(boolean useBuffer) {
+        isUseBuffer = useBuffer;
     }
 }

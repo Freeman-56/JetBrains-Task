@@ -37,30 +37,24 @@ public class TextEditor extends JFrame implements ActionListener {
             public void insertUpdate(DocumentEvent e) {
                 parser.setSource(textArea.getText());
                 try {
-                    if(textArea.getText().charAt(textArea.getCaretPosition()) == 'i' && !watch) {
+                    if(textArea.getText().charAt(textArea.getCaretPosition()) == 'i' && !watch)
                         ready = false;
-                    }
-                    if (textArea.getText().charAt(textArea.getCaretPosition()) == '{'
-                            && !watch
-                            && textArea.getText().charAt(textArea.getCaretPosition() - 1) == ')') {
+                    if (textArea.getText().charAt(textArea.getCaretPosition()) == '{' && !watch)
                         watch = true;
-                    }
                     if(watch)
-                        if(textArea.getText().charAt(textArea.getCaretPosition()) == '\n'
-                                || textArea.getText().charAt(textArea.getCaretPosition()) == '}'){
-                            if(textArea.getText().charAt(textArea.getCaretPosition()) == '}'){
-                                ready = true;
-                                watch = false;
-                            }
-                    }
-                    if(textArea.getText().charAt(textArea.getCaretPosition()) == ';') {
+                        if(textArea.getText().charAt(textArea.getCaretPosition()) == '}'){
+                            ready = true;
+                            watch = false;
+                        }
+                    if(textArea.getText().charAt(textArea.getCaretPosition()) == ';' && !watch) {
                         ready = true;
                         watch = false;
                     }
-                    if(ready)
+                    if(ready) {
                         program = parser.parse();
-                    if(ifChecker.isRightIfAdded(program)) {
-                        JOptionPane.showMessageDialog(frame, "If-statement added");
+                        if (ifChecker.isRightIfAdded(program)) {
+                            JOptionPane.showMessageDialog(frame, "If-statement added");
+                        }
                     }
                 } catch (Exception ex) {
                     ex.getStackTrace();
