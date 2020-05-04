@@ -41,7 +41,7 @@ public abstract class ParserBase {
             next();
     }
 
-    protected String matchNoExcept(String ... terms){
+    private String matchNoExcept(String ... terms){
         int pos = getPos();
         for(String s : terms){
             boolean match = true;
