@@ -29,7 +29,7 @@ public abstract class ParserBase {
     protected void next(){
         if(!end()) {
             if(!isUseBuffer)
-                this.pos = this.pos + 1;
+                pos++;
             else
                 bufferPos++;
         }

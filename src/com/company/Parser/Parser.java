@@ -28,7 +28,6 @@ public class Parser extends ParserBase {
         if(Character.isLetter(current())) {
             identifier.append(current());
             next();
-
             while (Character.isLetterOrDigit(current())) {
                 identifier.append(current());
                 next();

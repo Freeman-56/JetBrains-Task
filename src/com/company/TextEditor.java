@@ -41,11 +41,10 @@ public class TextEditor extends JFrame implements ActionListener {
                         ready = false;
                     if (textArea.getText().charAt(textArea.getCaretPosition()) == '{' && !watch)
                         watch = true;
-                    if(watch)
-                        if(textArea.getText().charAt(textArea.getCaretPosition()) == '}'){
-                            ready = true;
-                            watch = false;
-                        }
+                    if(textArea.getText().charAt(textArea.getCaretPosition()) == '}' && watch){
+                        ready = true;
+                        watch = false;
+                    }
                     if(textArea.getText().charAt(textArea.getCaretPosition()) == ';' && !watch) {
                         ready = true;
                         watch = false;

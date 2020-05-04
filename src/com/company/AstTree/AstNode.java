@@ -37,7 +37,6 @@ public class AstNode {
     public void addChild(AstNode child){
         if(child.getParent() != null)
             child.getParent().childs.remove(child);
-        childs.remove(child);
         childs.add(child);
         child.parent = this;
     }

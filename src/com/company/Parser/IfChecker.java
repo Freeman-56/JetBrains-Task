@@ -18,8 +18,8 @@ public class IfChecker {
         }
         int beginPosOld;
         for (int i = 0; i < getMinSize(); i++) {
-            if((oldNodes.get(i).getType() != AstNodeType.IF_STATEMENT
-                    && newNodes.get(i).getType() == AstNodeType.IF_STATEMENT)){
+            if(oldNodes.get(i).getType() != AstNodeType.IF_STATEMENT
+                    && newNodes.get(i).getType() == AstNodeType.IF_STATEMENT){
                 beginPosOld = i; // позиция выражения
                 int newNodesPos;
 
@@ -37,6 +37,8 @@ public class IfChecker {
                     if(!oldNodes.get(i).equals(newNodes.get(i))
                             && newNodes.get(i).getChild(1).getChilds().contains(oldNodes.get(i)))
                         return true;
+                    else if(newNodes.get(i).getChild(1).getChilds().size() == 0)
+                        return false;
                 }
         }
          return false;
@@ -53,7 +55,7 @@ public class IfChecker {
                 if(!repeat)
                     nodeCount++;
                 else nodeCount--;
-                if((posOld) == oldNodes.size())
+                if(posOld == oldNodes.size())
                     break;
             }
             if (!repeat && newNodesPos < newNodes.size()) {
