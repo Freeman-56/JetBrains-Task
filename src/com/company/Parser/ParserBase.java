@@ -1,13 +1,13 @@
 package com.company.Parser;
 
-public abstract class ParserBase {
+public class ParserBase {
     private String source;
     private String buffer;
     private boolean isUseBuffer;
     private int bufferPos;
     private int pos;
 
-    protected void setSourceAndDefault(String source){
+    public void setSourceAndDefault(String source){
         this.source = source;
         buffer = null;
         isUseBuffer = false;
@@ -15,18 +15,18 @@ public abstract class ParserBase {
         pos = 0;
     }
 
-    protected char current(){
+    public char current(){
         if(!isUseBuffer)
             return getPos() < source.length() ? source.charAt(getPos()) : (char)0;
         else
             return getPos() < buffer.length() ? buffer.charAt(getPos()) : (char)0;
     }
 
-    protected boolean end(){
+    public boolean end(){
         return current() == 0;
     }
 
-    protected void next(){
+    public void next(){
         if(!end()) {
             if(!isUseBuffer)
                 pos++;
@@ -35,7 +35,7 @@ public abstract class ParserBase {
         }
     }
 
-    protected void skip(){
+    public void skip(){
         String DEFAULT_WHITESPACES = " \n\r\t";
         while (DEFAULT_WHITESPACES.indexOf(current()) >= 0)
             next();
@@ -65,7 +65,7 @@ public abstract class ParserBase {
         return null;
     }
 
-    protected boolean isMatch(String ... terms){
+    public boolean isMatch(String ... terms){
         int pos = getPos();
         String result = matchNoExcept(terms);
         if(!isUseBuffer)
@@ -74,7 +74,7 @@ public abstract class ParserBase {
         return result != null;
     }
 
-    protected String match(String... terms) throws Exception {
+    public String match(String... terms) throws Exception {
         String result = matchNoExcept(terms);
         if(result == null) {
             throw new Exception("Bad string");
@@ -84,31 +84,31 @@ public abstract class ParserBase {
 
     }
 
-    protected String getSource() {
+    public String getSource() {
         return source;
     }
 
-    protected int getPos() {
+    public int getPos() {
         if(!isUseBuffer)
             return pos;
         else return bufferPos;
     }
 
-    protected void setPos(int pos) {
+    public void setPos(int pos) {
         if(!isUseBuffer)
             this.pos = pos;
         else bufferPos = pos;
     }
 
-    protected void setBuffer(String buffer) {
+    public void setBuffer(String buffer) {
         this.buffer = buffer;
     }
 
-    protected void setBufferPosBegin() {
+    public void setBufferPosBegin() {
         this.bufferPos = 0;
     }
 
-    protected void setUseBuffer(boolean useBuffer) {
+    public void setUseBuffer(boolean useBuffer) {
         isUseBuffer = useBuffer;
     }
 }
