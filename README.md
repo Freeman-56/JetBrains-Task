@@ -1,5 +1,79 @@
 # Задача для JetBrains (IDE Feature Suggester)
-Запуск: 
+## Условие:
+### Грамматика модельного языка
+```<>
+Program → StatementList
+
+StatementList → empty | StatementList Statement
+
+Statement → ExpressionStatement | IfStatement | AssignStatement | BlockStatement
+
+ExpressionStatement -> Expression ;
+
+IfStatement → if ( Expression ) Statement
+
+AssignStatement → @ Identifier = Expression ;
+
+BlockStatement → { StatementList }
+
+Expression → ConditionExpression
+
+ConditionExpression -> PlusMinusExpression | PlusMinusExpression < PlusMinusExpression | PlusMinusExpression > PlusMinusExpression
+
+PlusMinusExpression → MultiplyDivisionExpression | PlusMinusExpression + MultiplyDivisionExpression | PlusMinusExpression - MultiplyDivisionExpression
+
+MultiplyDivisionExpression → SimpleExpression | MultiplyDivisionExpression * SimpleExpression | MultiplyDivisionExpression / SimpleExpression
+
+SimpleExpression → Identifier | Integer | ( Expression )
+
+Identifier → Идентификатор из латинских букв
+
+Integer → Целое число, помещающееся в тип int в Java
+  ```
+Между любыми лексемами программы могут быть пробельные символы (собственно пробелы, табуляции, переносы строк).
+
+#### Особенности семантики языка
+* Если Statement является ExpressionStatement’ом, то результат выражения идёт в вывод программы на этом языке.
+* Результаты всех выражений имеют тип int
+* Тело if’а выполняется, если его условие не равно 0.
+* Операторы сравнения < и > возвращают 1, если соотношение истинно и 0, если ложно.
+#### Пример программы модельного языка:
+```
+@x = 10;
+@second = 20;
+if (second - 19) {
+x + 1;
+}
+x*second + second/x*3;
+```
+У этой программы должен быть вывод 11, 206
+
+### Задача
+
+Требуется реализовать простой редактор (желательно на стандартной Java библиотеке Swing, языком программирование может быть как Java, так и Kotlin). В редакторе должна присутствовать кнопка запуска, после чего пользователь должен увидеть в каком-то виде вывод программы. В процессе редактирования кода в Вашем редакторе, нужно уметь отлавливать ситуацию, когда пользователь оборачивает if’ом (возможно ещё без условия) и фигурными скобками несколько _Statement_’ов (в случае, если программа корректна). Об этом событии нужно сообщать пользователю.
+
+Дизайн и функциональность самого редактора будут оцениваться в последнюю очередь, не стоит на это тратить время.
+Пример редактирования
+
+Было
+```
+10 * 2;
+13 + 7;
+```
+Затем пользователь дописал **if()** в начало (мог написать и с условием сразу) :
+```
+if () 10 * 2;
+13 + 7;
+```
+Пока ничего сообщать не нужно. Затем пользователь расставил скобки (в любом порядке)
+```
+if () { 10 * 2;
+13 + 7; }
+```
+В этот момент надо сообщить пользователю, что добавился обрамляющий **if.**
+
+
+## Запуск: 
   ```<>
     javac -d out -sourcepath src src/com/company/Main.java
     jar cvfm TextEditor.jar ./manifest.txt ./out/com/company/AstTree ^ ./out/com/company/Parser ^ ./out/com/company
